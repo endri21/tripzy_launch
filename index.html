@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tripzy — Your Next Adventure Starts Here</title>
+  <meta name="description" content="AI-powered trip planning. Curated travel packages. Launching April 10, 2026." />
+  <meta property="og:title" content="Tripzy — Coming Soon" />
+  <meta property="og:description" content="AI-powered trip planning. Curated travel packages from professional agencies." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #6366F1;
+      --primary-light: #818CF8;
+      --primary-glow: rgba(99, 102, 241, 0.4);
+      --accent: #F97316;
+      --coral: #F97066;
+      --bg: #06060F;
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --text-dim: #475569;
+      --success: #10B981;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── Gradient mesh background ── */
+    .mesh-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.5;
+      will-change: transform;
+    }
+
+    .blob-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(99,102,241,0.4), transparent 70%);
+      top: -15%; left: -10%;
+      animation: drift1 18s ease-in-out infinite;
+    }
+    .blob-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(249,112,102,0.3), transparent 70%);
+      top: 50%; right: -10%;
+      animation: drift2 22s ease-in-out infinite;
+    }
+    .blob-3 {
+      width: 450px; height: 450px;
+      background: radial-gradient(circle, rgba(129,140,248,0.3), transparent 70%);
+      bottom: -10%; left: 30%;
+      animation: drift3 20s ease-in-out infinite;
+    }
+    .blob-4 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(249,115,22,0.2), transparent 70%);
+      top: 20%; right: 25%;
+      animation: drift4 24s ease-in-out infinite;
+    }
+
+    @keyframes drift1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(80px, 60px) scale(1.1); }
+      66% { transform: translate(-40px, 80px) scale(0.95); }
+    }
+    @keyframes drift2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-60px, -80px) scale(1.05); }
+      66% { transform: translate(40px, -40px) scale(1.1); }
+    }
+    @keyframes drift3 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(60px, -50px) scale(1.08); }
+      66% { transform: translate(-80px, 20px) scale(0.95); }
+    }
+    @keyframes drift4 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-50px, 60px) scale(1.12); }
+      66% { transform: translate(70px, -30px) scale(0.9); }
+    }
+
+    /* ── Noise overlay ── */
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    }
+
+    /* ── Particles canvas ── */
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ── Floating destination stamps ── */
+    .stamps {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+      perspective: 800px;
+    }
+
+    .stamp {
+      position: absolute;
+      padding: 8px 18px;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 100px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.25);
+      white-space: nowrap;
+      animation: floatStamp var(--dur) linear infinite;
+      animation-delay: var(--delay);
+      left: var(--x);
+      top: var(--y);
+      opacity: 0;
+    }
+
+    @keyframes floatStamp {
+      0% { opacity: 0; transform: translateY(30px) rotateX(15deg) rotateY(-5deg) scale(0.9); }
+      8% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-60px) rotateX(-8deg) rotateY(5deg) scale(1.02); }
+    }
+
+    /* ── Content ── */
+    .content {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    /* ── Logo ── */
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      animation: fadeUp 1s ease-out both;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px var(--primary-glow);
+    }
+
+    .logo-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #fff;
+    }
+
+    .logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 30%, var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Tagline ── */
+    .tagline {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(34px, 5vw, 60px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -2px;
+      max-width: 680px;
+      margin-bottom: 18px;
+      animation: fadeUp 1s ease-out 0.12s both;
+    }
+
+    .tagline .highlight {
+      background: linear-gradient(135deg, var(--primary-light), var(--coral));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--text-muted);
+      max-width: 460px;
+      line-height: 1.65;
+      margin-bottom: 48px;
+      animation: fadeUp 1s ease-out 0.24s both;
+    }
+
+    /* ── Countdown ── */
+    .cd-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--primary-light);
+      margin-bottom: 16px;
+      animation: fadeUp 1s ease-out 0.36s both;
+    }
+
+    .countdown {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 48px;
+      animation: fadeUp 1s ease-out 0.42s both;
+    }
+
+    .cd-block {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 18px 14px;
+      min-width: 82px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .cd-block:hover {
+      border-color: rgba(99,102,241,0.3);
+      box-shadow: 0 0 24px rgba(99,102,241,0.08);
+    }
+
+    .cd-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(30px, 4vw, 46px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1;
+      background: linear-gradient(180deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .cd-value.tick { transform: scale(1.1); }
+
+    .cd-unit {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+
+    /* ── Newsletter ── */
+    .newsletter {
+      animation: fadeUp 1s ease-out 0.52s both;
+      width: 100%;
+      max-width: 440px;
+      margin-bottom: 36px;
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 0;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 5px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .newsletter-form:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow), 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .newsletter-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      padding: 14px 16px;
+      min-width: 0;
+    }
+
+    .newsletter-input::placeholder { color: var(--text-dim); }
+
+    .newsletter-btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      border: none;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+
+    .newsletter-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px var(--primary-glow);
+    }
+    .newsletter-btn:active { transform: scale(0.97); }
+    .newsletter-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .newsletter-msg {
+      font-size: 13px;
+      margin-top: 12px;
+      min-height: 20px;
+      transition: all 0.3s;
+    }
+    .newsletter-msg.success { color: var(--success); }
+    .newsletter-msg.error { color: var(--coral); }
+
+    /* ── Feature pills ── */
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 48px;
+      animation: fadeUp 1s ease-out 0.62s both;
+    }
+
+    .feature-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 100px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: border-color 0.3s, color 0.3s;
+    }
+
+    .feature-pill:hover {
+      border-color: rgba(99,102,241,0.3);
+      color: var(--text);
+    }
+
+    .feature-pill .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary-light);
+    }
+
+    /* ── Socials ── */
+    .socials {
+      display: flex;
+      gap: 16px;
+      animation: fadeUp 1s ease-out 0.72s both;
+    }
+
+    .social-link {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .social-link:hover {
+      border-color: var(--primary);
+      color: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+
+    .social-link svg { width: 20px; height: 20px; fill: currentColor; }
+
+    /* ── Footer ── */
+    .footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .countdown { gap: 8px; }
+      .cd-block { min-width: 64px; padding: 14px 8px; border-radius: 12px; }
+      .cd-unit { font-size: 9px; letter-spacing: 1.5px; }
+      .newsletter-form { flex-direction: column; }
+      .newsletter-btn { border-radius: 10px; }
+      .features { gap: 8px; }
+      .feature-pill { font-size: 12px; padding: 6px 12px; }
+      .logo-icon { width: 40px; height: 40px; border-radius: 12px; }
+      .logo-icon svg { width: 20px; height: 20px; }
+      .logo-text { font-size: 28px; }
+      .blob { filter: blur(80px); }
+      .blob-1 { width: 350px; height: 350px; }
+      .blob-2 { width: 300px; height: 300px; }
+      .blob-3 { width: 280px; height: 280px; }
+      .blob-4 { width: 200px; height: 200px; }
+      .stamp { font-size: 11px; padding: 6px 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .blob, .stamp { animation: none !important; }
+      .cd-value.tick { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Gradient mesh background -->
+  <div class="mesh-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+  </div>
+
+  <div class="noise"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- Floating destination stamps -->
+  <div class="stamps">
+    <div class="stamp" style="--x:6%;  --y:12%; --dur:14s; --delay:0s">Rome</div>
+    <div class="stamp" style="--x:82%; --y:8%;  --dur:16s; --delay:2s">Paris</div>
+    <div class="stamp" style="--x:90%; --y:55%; --dur:13s; --delay:4s">Tokyo</div>
+    <div class="stamp" style="--x:4%;  --y:60%; --dur:17s; --delay:1s">Barcelona</div>
+    <div class="stamp" style="--x:70%; --y:80%; --dur:15s; --delay:6s">New York</div>
+    <div class="stamp" style="--x:20%; --y:85%; --dur:14s; --delay:3s">Bali</div>
+    <div class="stamp" style="--x:50%; --y:5%;  --dur:18s; --delay:5s">Istanbul</div>
+    <div class="stamp" style="--x:15%; --y:38%; --dur:16s; --delay:7s">Santorini</div>
+    <div class="stamp" style="--x:88%; --y:32%; --dur:15s; --delay:8s">Dubai</div>
+    <div class="stamp" style="--x:40%; --y:90%; --dur:14s; --delay:9s">London</div>
+    <div class="stamp" style="--x:60%; --y:18%; --dur:17s; --delay:10s">Lisbon</div>
+    <div class="stamp" style="--x:30%; --y:10%; --dur:15s; --delay:11s">Marrakech</div>
+  </div>
+
+  <!-- Main content -->
+  <div class="content">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+      </div>
+      <div class="logo-text">Tripzy</div>
+    </div>
+
+    <h1 class="tagline">
+      Your Next <span class="highlight">Adventure</span> Starts Here
+    </h1>
+
+    <p class="subtitle">
+      AI-powered trip planning, curated packages from professional agencies, and everything you need for seamless travel.
+    </p>
+
+    <div class="cd-label">Launching In</div>
+    <div class="countdown" id="countdown">
+      <div class="cd-block">
+        <div class="cd-value" id="cd-days">00</div>
+        <div class="cd-unit">Days</div>
+      </div>
+      <div class="cd-block">
+        <div class="cd-value" id="cd-hours">00</div>
+        <div class="cd-unit">Hours</div>
+      </div>
+      <div class="cd-block">
+        <div class="cd-value" id="cd-mins">00</div>
+        <div class="cd-unit">Mins</div>
+      </div>
+      <div class="cd-block">
+        <div class="cd-value" id="cd-secs">00</div>
+        <div class="cd-unit">Secs</div>
+      </div>
+    </div>
+
+    <div class="newsletter">
+      <form class="newsletter-form" id="newsletter-form">
+        <input
+          class="newsletter-input"
+          type="email"
+          id="email-input"
+          placeholder="Enter your email"
+          required
+          autocomplete="email"
+        />
+        <button class="newsletter-btn" type="submit" id="newsletter-btn">Notify Me</button>
+      </form>
+      <div class="newsletter-msg" id="newsletter-msg"></div>
+    </div>
+
+    <div class="features">
+      <div class="feature-pill"><span class="dot"></span> AI Trip Planning</div>
+      <div class="feature-pill"><span class="dot"></span> Agency Packages</div>
+      <div class="feature-pill"><span class="dot"></span> Smart Itineraries</div>
+      <div class="feature-pill"><span class="dot"></span> Email Import</div>
+      <div class="feature-pill"><span class="dot"></span> Collaboration</div>
+    </div>
+
+    <div class="socials">
+      <a href="#" class="social-link" aria-label="Instagram" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+      </a>
+      <a href="#" class="social-link" aria-label="X / Twitter" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="#" class="social-link" aria-label="TikTok" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+      </a>
+      <a href="#" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">&copy; 2026 Tripzy. All rights reserved.</div>
+
+  <script>
+    // ═══════════════════════════════════════
+    // COUNTDOWN — April 10, 2026
+    // ═══════════════════════════════════════
+    const LAUNCH = new Date('2026-04-10T00:00:00').getTime();
+
+    function updateCountdown() {
+      const diff = Math.max(0, LAUNCH - Date.now());
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      const secsEl = document.getElementById('cd-secs');
+      const newS = String(s).padStart(2, '0');
+      if (secsEl.textContent !== newS) {
+        secsEl.classList.add('tick');
+        setTimeout(() => secsEl.classList.remove('tick'), 200);
+      }
+
+      document.getElementById('cd-days').textContent = String(d).padStart(2, '0');
+      document.getElementById('cd-hours').textContent = String(h).padStart(2, '0');
+      document.getElementById('cd-mins').textContent = String(m).padStart(2, '0');
+      secsEl.textContent = newS;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // ═══════════════════════════════════════
+    // NEWSLETTER
+    // ═══════════════════════════════════════
+    const form = document.getElementById('newsletter-form');
+    const emailInput = document.getElementById('email-input');
+    const btn = document.getElementById('newsletter-btn');
+    const msg = document.getElementById('newsletter-msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      msg.textContent = '';
+      msg.className = 'newsletter-msg';
+
+      try {
+        const res = await fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        if (!res.ok) throw new Error('Failed');
+
+        msg.textContent = "You're on the list! We'll notify you at launch.";
+        msg.className = 'newsletter-msg success';
+        emailInput.value = '';
+      } catch {
+        msg.textContent = 'Something went wrong. Please try again.';
+        msg.className = 'newsletter-msg error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Notify Me';
+      }
+    });
+
+    // ═══════════════════════════════════════
+    // PARTICLE SPARKLES
+    // ═══════════════════════════════════════
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    const TAU = Math.PI * 2;
+
+    let W, H;
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const particles = [];
+    const PARTICLE_COUNT = 80;
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        size: Math.random() * 1.5 + 0.4,
+        alpha: Math.random() * 0.4 + 0.1,
+        pulse: Math.random() * TAU,
+        pulseSpeed: Math.random() * 0.02 + 0.008,
+      });
+    }
+
+    // Occasional shooting stars
+    const shootingStars = [];
+    function spawnStar() {
+      shootingStars.push({
+        x: Math.random() * W * 0.7 + W * 0.15,
+        y: Math.random() * H * 0.3,
+        vx: 3 + Math.random() * 3,
+        vy: 1 + Math.random() * 1.5,
+        life: 1,
+        trail: 10 + Math.random() * 8,
+      });
+      setTimeout(spawnStar, 5000 + Math.random() * 8000);
+    }
+    setTimeout(spawnStar, 2000);
+
+    function renderParticles() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Particles
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.pulse += p.pulseSpeed;
+
+        // Wrap around
+        if (p.x < -10) p.x = W + 10;
+        if (p.x > W + 10) p.x = -10;
+        if (p.y < -10) p.y = H + 10;
+        if (p.y > H + 10) p.y = -10;
+
+        const flicker = 0.6 + Math.sin(p.pulse) * 0.4;
+        ctx.globalAlpha = p.alpha * flicker;
+        ctx.fillStyle = '#C4B5FD';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, TAU);
+        ctx.fill();
+      }
+
+      // Shooting stars
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const ss = shootingStars[i];
+        ss.x += ss.vx;
+        ss.y += ss.vy;
+        ss.life -= 0.01;
+        if (ss.life <= 0) { shootingStars.splice(i, 1); continue; }
+
+        const tailX = ss.x - ss.vx * ss.trail;
+        const tailY = ss.y - ss.vy * ss.trail;
+        const grad = ctx.createLinearGradient(ss.x, ss.y, tailX, tailY);
+        grad.addColorStop(0, `rgba(199,190,255,${ss.life * 0.8})`);
+        grad.addColorStop(1, 'rgba(199,190,255,0)');
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.5 * ss.life;
+        ctx.globalAlpha = 1;
+        ctx.beginPath();
+        ctx.moveTo(ss.x, ss.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+
+        ctx.globalAlpha = ss.life;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(ss.x, ss.y, 1.2 * ss.life, 0, TAU);
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = 1;
+
+      // Connect nearby particles with faint lines
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.globalAlpha = (1 - dist / 120) * 0.06;
+            ctx.strokeStyle = '#818CF8';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(renderParticles);
+    }
+
+    renderParticles();
+  </script>
+</body>
+</html>
