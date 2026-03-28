@@ -24,10 +24,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Use onboarding@resend.dev until tripzy.pro domain is verified on Resend.
-    // Once verified, change to: 'Tripzy <noreply@tripzy.pro>'
-    const FROM = process.env.RESEND_FROM || 'Tripzy <onboarding@resend.dev>';
-
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -35,14 +31,10 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: FROM,
+        from: 'Tripzy <noreply@tripzy.pro>',
         to: 'hello@tripzy.pro',
-        subject: 'New Tripzy Launch Subscriber',
-        html: `
-          <h2>New subscriber for Tripzy launch!</h2>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Date:</strong> ${new Date().toISOString()}</p>
-        `,
+        subject: 'New Launch Subscriber',
+        html: `<p>I <strong>${email}</strong> want to be part of the tripzy</p>`,
       }),
     });
 
