@@ -624,7 +624,7 @@
       msg.className = 'newsletter-msg';
 
       try {
-        const res = await fetch('/api/notify', {
+        const res = await fetch('https://formspree.io/f/mpqopade', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email }),
