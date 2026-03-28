@@ -1,4 +1,11 @@
 export default async function handler(req, res) {
+  // Allow CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -12,10 +19,15 @@ export default async function handler(req, res) {
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
   if (!RESEND_API_KEY) {
-    return res.status(500).json({ error: 'Server misconfigured' });
+    console.error('RESEND_API_KEY env variable is not set');
+    return res.status(500).json({ error: 'RESEND_API_KEY not configured' });
   }
 
   try {
+    // Use onboarding@resend.dev until tripzy.pro domain is verified on Resend.
+    // Once verified, change to: 'Tripzy <noreply@tripzy.pro>'
+    const FROM = process.env.RESEND_FROM || 'Tripzy <onboarding@resend.dev>';
+
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -23,9 +35,9 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Tripzy <noreply@tripzy.pro>',
+        from: FROM,
         to: 'hello@tripzy.pro',
-        subject: 'New Launch Subscriber',
+        subject: 'New Tripzy Launch Subscriber',
         html: `
           <h2>New subscriber for Tripzy launch!</h2>
           <p><strong>Email:</strong> ${email}</p>
@@ -34,15 +46,16 @@ export default async function handler(req, res) {
       }),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const err = await response.json();
-      console.error('Resend error:', err);
-      return res.status(500).json({ error: 'Failed to send' });
+      console.error('Resend API error:', JSON.stringify(data));
+      return res.status(500).json({ error: data.message || 'Failed to send' });
     }
 
     return res.status(200).json({ success: true });
   } catch (err) {
-    console.error('Notify error:', err);
-    return res.status(500).json({ error: 'Internal error' });
+    console.error('Notify error:', err.message);
+    return res.status(500).json({ error: err.message });
   }
 }
